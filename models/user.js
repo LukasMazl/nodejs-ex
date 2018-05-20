@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-//const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');
 
 
 // basic schema, only username and password
@@ -94,13 +94,13 @@ UserSchema.statics.getSimularLogin = function (part, callback) {
 UserSchema.pre('save', function (next) {
   var user = this;
   // bcrypt hash method
- /* bcrypt.hash(user.password, 10, function (err, hash){
+  bcrypt.hash(user.password, 10, function (err, hash){
     if (err) {
       return next(err);
     }
-    user.password = hash;*/
+    user.password = hash;
     next();
- // })
+  })
 });
 
 
