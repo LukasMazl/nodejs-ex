@@ -28,7 +28,8 @@ nunjucks.configure('views', {
 
 // mongoose setup
 let mongoDBUrl = process.env.OPENSHIFT_MONGODB_DB_URL + process.env.OPENSHIFT_APP_NAME;
-console.log(mongoDBUrl);
+console.log(process.env.MONGODB_USER);
+console.log("Ahoj jak se mas?");
 mongoose.connect(mongoDBUrl);
 mongoose.Promise = global.Promise;
 
