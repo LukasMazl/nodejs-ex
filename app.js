@@ -29,7 +29,7 @@ nunjucks.configure('views', {
 // mongoose setup
 let mongoDBUrl = "mongodb://" + process.env.MONGODB_USER
     + ":" + process.env.MONGODB_PASSWORD +
-    "@127.0.0.1:27017/"+ process.env.MONGODB_DATABASE;
+    "@172.30.1.159:27017/"+ process.env.MONGODB_DATABASE;
 console.log(mongoDBUrl);
 mongoose.connect(mongoDBUrl);
 mongoose.Promise = global.Promise;
