@@ -1,0 +1,237 @@
+{% extends "layout.html" %}
+
+{% block top %}
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1>Seznam úkolu</h1>
+        <p>Na této stránce můžete vidíte co je ještě potřeba splnit.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block main %}
+
+<style>
+    #taskContainer {
+        padding: 20px;
+    }
+
+    .bordered:hover {
+        border: black solid 1px;
+    }
+    .card {
+        margin-bottom: 20px;
+    }
+</style>
+
+<script type="application/javascript">
+    ACTIVE_TASK_ID = "";
+
+    function tableHead() {
+        return "<table class=\"table table-bordered\">\n" +
+                "<tbody>\n";
+    }
+
+    function tableFooter() {
+        return  "    </tbody>\n" +
+                "  </table>";
+    }
+
+    function addRow(name, value) {
+        var row = "<tr>\n" +
+        "        <th>"+ name +"</th>\n" +
+        "        <td>"+ value +"</td>\n" +
+        "      </tr>\n";
+        return row;
+    }
+
+    function prepareModal(task, taskId) {
+        var modalBody = document.getElementById("taskdescription");
+
+        document.getElementById("modalTitle").innerText = task.title;
+
+        var table = tableHead();
+
+        table += addRow('Popisek', task.description);
+        table += addRow('Vytvoreno', task.created);
+        table += addRow('Nutno splnit', task.deathline);
+        table += addRow('Řešitel', task.solver);
+        table += addRow('Autor', task.author);
+        table += addRow('Stav', task.state);
+        table += tableFooter();
+
+        if(task.state === 'ACTIVE') {
+            $("#deleteTask").show();
+            $("#finishTask").show();
+        } else {
+            $("#deleteTask").hide();
+            $("#finishTask").hide();
+        }
+
+        modalBody.innerHTML = table;
+    }
+
+    function showTaskDescription(taskId) {
+        $.post("/api/getTask",
+            {
+                taskId: taskId
+            },
+            function(data, status){
+                prepareModal(data.task[0],taskId);
+                $("#myModal").modal();
+            });
+    }
+
+    function deleteTsk(taskId) {
+        $.post("/api/deleteTask",
+            {
+                taskId: taskId
+            },
+            function(data, status){
+                location.reload();
+            });
+    }
+
+    function getFilterValues() {
+       var filters = document.getElementsByClassName("filter");
+       var filterList = [];
+       for(var i = 0; i < filters.length; i++) {
+           if(filters[i].checked) {
+                filterList.push(filters[i].value);
+           }
+       }
+       return filterList;
+    }
+
+    function prepareCard(task) {
+        return "<div class=\"card bordered\">\n" +
+            "                <div class=\"card-body text-center\">\n" +
+            "                    <div id=\""+task._id+"\" class=\"task\">\n" +
+            "                        <h3 class=\"card-text\">\n" +
+            "                            " + task.title + "\n" +
+            "                        </h3>\n" +
+            "                        <p>" + task.description +"</p>\n" +
+            "                    </div>\n" +
+            "                </div>\n" +
+            "            </div>";
+    }
+
+    function fiteredTask() {
+        var array = getFilterValues();
+        $.post("/api/getTasks",
+            {
+                "filter" : array
+            },
+            function(data, status){
+                var cardContainer = document.getElementById("taskContainer");
+                cardContainer.innerHTML = "";
+                for(var i = 0; i < data.task.length; i++) {
+                    cardContainer.innerHTML += prepareCard(data.task[i]);
+                }
+                $(".task").click(function (e) {
+                    ACTIVE_TASK_ID = e.currentTarget.id;
+                    showTaskDescription(e.currentTarget.id);
+                });
+            });
+    }
+
+    function completeTask(taskId) {
+        $.post("/api/completeTask",
+            {
+                taskId: taskId
+            },
+            function(data, status){
+                location.reload();
+            });
+    }
+
+    $(document).ready(function () {
+        $(".task").click(function (e) {
+            ACTIVE_TASK_ID = e.currentTarget.id;
+            showTaskDescription(e.currentTarget.id);
+        });
+
+        $("#deleteTask").click(function(e) {
+            deleteTsk(ACTIVE_TASK_ID);
+            }
+        );
+        $("#finishTask").click(function () {
+            completeTask(ACTIVE_TASK_ID);
+        });
+        $("#editTask").click(function () {
+            window.location = "edit?taskid=" + ACTIVE_TASK_ID;
+        });
+
+        $(".filter").click(fiteredTask);
+    });
+
+</script>
+
+<main role="main" class="container">
+    {% if tasks|length%}
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Filter</h4>
+            <div class="form-check-inline">
+                <label class="form-check-label">
+                    <input type="checkbox" class="filter form-check-input" value="ACTIVE" checked >Aktivní
+                </label>
+            </div>
+            <div class="form-check-inline">
+                <label class="form-check-label">
+                    <input type="checkbox" class="filter form-check-input" value="COMPLETED">Vyřešené
+                </label>
+            </div>
+        </div>
+    </div>
+    {%else%}
+
+    {% include "newTask.html" %}
+
+    {%endif%}
+    <div id="taskContainer">
+    {% for task in tasks %}
+
+                <div class="card bordered">
+                    <div class="card-body text-center">
+                        <div id="{{task._id}}" class="task">
+                            <h3 class="card-text">
+                                {{task.title}}
+                            </h3>
+                            <p>{{ task.description }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% endfor %}
+            </div>
+    </div>
+</main>
+
+<!-- The Modal -->
+<div class="modal" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header" >
+                <h4 class="modal-title" id="modalTitle">Modal Heading</h4>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body" id="taskdescription">
+
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer" id="modalFooter">
+                <button id="editTask" type="button" class="btn btn-danger">Upravit!</button>
+                <button id="finishTask" type="button" class="btn btn-danger">Hotovo!</button>
+                <button id="deleteTask" type="button" class="btn btn-danger">Smazat</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Zavřít okno</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

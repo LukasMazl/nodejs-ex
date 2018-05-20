@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+     <meta name="description" content="">
+     <meta name="author" content="">
+
+     <title>TODO List</title>
+
+     <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+
+
+    <header class="blog-header">
+        <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+            <ul class="navbar-nav">
+                {% if session.userId %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/todo/">Hlavní stránka</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/todo/newTask">Přidat úkol</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Odhlásit se</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Přihlásit se</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/newuser">Nový uživatel</a>
+                    </li>
+                {% endif %}
+
+            </ul>
+        </nav>
+    </header>
+
+
+    {% block top %}{% endblock %}
+    <div class="container">
+    {% if error %}
+    <div class="alert alert-{{type}} alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Alert!</strong> {{error}}
+    </div>
+    {% endif %}
+
+    {% block main %}{% endblock %}
+
+    </div>
+    <footer class="blog-footer">
+
+    </footer>
+</body>
+</html>
