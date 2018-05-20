@@ -27,7 +27,7 @@ nunjucks.configure('views', {
 });
 
 // mongoose setup
-let mongoDBUrl = process.env.MONGODB_URI || 'mongodb://localhost/test';
+let mongoDBUrl = process.env.OPENSHIFT_MONGODB_DB_URL + process.env.OPENSHIFT_APP_NAME;
 mongoose.connect(mongoDBUrl);
 mongoose.Promise = global.Promise;
 
